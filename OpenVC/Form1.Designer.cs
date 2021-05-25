@@ -38,6 +38,10 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.heightbox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.voice = new System.Windows.Forms.Label();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.detected = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -138,11 +142,52 @@
             this.heightbox.Size = new System.Drawing.Size(100, 19);
             this.heightbox.TabIndex = 9;
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("MS UI Gothic", 18F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.label5.Location = new System.Drawing.Point(-2, 199);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(106, 24);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "\"認識中\"";
+            // 
+            // voice
+            // 
+            this.voice.AutoSize = true;
+            this.voice.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.voice.Location = new System.Drawing.Point(-1, 223);
+            this.voice.Name = "voice";
+            this.voice.Size = new System.Drawing.Size(88, 16);
+            this.voice.TabIndex = 12;
+            this.voice.Text = "音声認識中";
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(176, 216);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(100, 23);
+            this.progressBar1.TabIndex = 13;
+            // 
+            // detected
+            // 
+            this.detected.AutoSize = true;
+            this.detected.Font = new System.Drawing.Font("MS UI Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.detected.Location = new System.Drawing.Point(-1, 250);
+            this.detected.Name = "detected";
+            this.detected.Size = new System.Drawing.Size(82, 16);
+            this.detected.TabIndex = 14;
+            this.detected.Text = "ふだ認識中";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(288, 210);
+            this.ClientSize = new System.Drawing.Size(288, 275);
+            this.Controls.Add(this.detected);
+            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.voice);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.heightbox);
             this.Controls.Add(this.label3);
@@ -172,6 +217,10 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox heightbox;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label voice;
+        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Label detected;
     }
 }
 

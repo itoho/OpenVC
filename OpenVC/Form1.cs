@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Speech.Recognition;
 using System.Text;
 using System.Windows.Forms;
 
@@ -8,6 +9,7 @@ namespace OpenVC
 {
     public partial class Form1 : Form
     {
+        public int targethuda = 0;
         public int enable = 1;
         public int sikiiti = 20;
         Queue<StringBuilder> queue = new Queue<StringBuilder>();
@@ -63,122 +65,259 @@ namespace OpenVC
 
         string hiragana = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをゐゑ";
 
+        
 
-
-        string[,] hyaku = new string[,]{{"あきのたのかりほのいほのとまをあらみ","わがころもではつゆにぬれつつ"},
+        string[,] hyaku = new string[,]{{"あきのたのかりほのいほのとまをあらみ","わがころもではつゆにぬれつつ"},//0
 {"はるすぎてなつきにけらししろたへの","ころもほすてふあまのかぐやま"},
 {"あしびきのやまどりのをのしだりをの","ながながしよをひとりかもねむ"},
 {"たごのうらにうちいでてみればしろたへの","ふじのたかねにゆきはふりつつ"},
 {"おくやまにもみぢふみわけなくしかの","こゑきくときぞあきはかなしき"},
-{"かささぎのわたせるはしにおくしもの","しろきをみればよぞふけにける"},
+{"かささぎのわたせるはしにおくしもの","しろきをみればよぞふけにける"},//5
 {"あまのはらふりさけみればかすがなる","みかさのやまにいでしつきかも"},
 {"わがいほはみやこのたつみしかぞすむ","よをうぢやまとひとはいふなり"},
 {"はなのいろはうつりにけりないたづらに","わがみよにふるながめせしまに"},
 {"これやこのゆくもかへるもわかれては","しるもしらぬもあふさかのせき"},
-{"わたのはらやそしまかけてこぎいでぬと","ひとにはつげよあまのつりぶね"},
+{"わたのはらやそしまかけてこぎいでぬと","ひとにはつげよあまのつりぶね"},//10
 {"あまつかぜくものかよひぢふきとぢよ","をとめのすがたしばしとどめむ"},
 {"つくばねのみねよりおつるみなのがは","こひぞつもりてふちとなりぬる"},
 {"みちのくのしのぶもぢずりたれゆゑに","みだれそめにしわれならなくに"},
 {"きみがためはるののにいでてわかなつむ","わがころもでにゆきはふりつつ"},
-{"たちわかれいなばのやまのみねにおふる","まつとしきかばいまかへりこむ"},
+{"たちわかれいなばのやまのみねにおふる","まつとしきかばいまかへりこむ"},//15
 {"ちはやぶるかみよもきかずたつたがは","からくれなゐにみづくくるとは"},
 {"すみのえのきしによるなみよるさへや","ゆめのかよひぢひとめよくらむ"},
 {"なにはがたみじかきあしのふしのまも","あはでこのよをすぐしてよとや"},
 {"わびぬればいまはたおなじなにはなる","みをつくしてもあはむとぞおもふ"},
-{"いまこむといひしばかりにながつきの","ありあけのつきをまちいでつるかな"},
+{"いまこむといひしばかりにながつきの","ありあけのつきをまちいでつるかな"},//20
 {"ふくからにあきのくさきのしをるれば","むべやまかぜをあらしといふらむ"},
 {"つきみればちぢにものこそかなしけれ","わがみひとつのあきにはあらねど"},
 {"このたびはぬさもとりあへずたむけやま","もみぢのにしきかみのまにまに"},
 {"なにしおはばあふさかやまのさねかづら","ひとにしられでくるよしもがな"},
-{"をぐらやまみねのもみぢばこころあらば","いまひとたびのみゆきまたなむ"},
+{"をぐらやまみねのもみぢばこころあらば","いまひとたびのみゆきまたなむ"},//25
 {"みかのはらわきてながるるいづみがは","いつみきとてかこひしかるらむ"},
 {"やまざとはふゆぞさびしさまさりける","ひとめもくさもかれぬとおもへば"},
 {"こころあてにをらばやをらむはつしもの","おきまどはせるしらぎくのはな"},
 {"ありあけのつれなくみえしわかれより","あかつきばかりうきものはなし"},
-{"あさぼらけありあけのつきとみるまでに","よしののさとにふれるしらゆき"},
+{"あさぼらけありあけのつきとみるまでに","よしののさとにふれるしらゆき"},//30
 {"やまがはにかぜのかけたるしがらみは","ながれもあへぬもみぢなりけり"},
 {"ひさかたのひかりのどけきはるのひに","しづごころなくはなのちるらむ"},
 {"たれをかもしるひとにせむたかさごの","まつもむかしのともならなくに"},
 {"ひとはいさこころもしらずふるさとは","はなぞむかしのかににほひける"},
-{"なつのよはまだよひながらあけぬるを","くものいづこにつきやどるらむ"},
+{"なつのよはまだよひながらあけぬるを","くものいづこにつきやどるらむ"},//35
 {"しらつゆにかぜのふきしくあきののは","つらぬきとめぬたまぞちりける"},
 {"わすらるるみをばおもはずちかひてし","ひとのいのちのをしくもあるかな"},
 {"あさぢふのをののしのはらしのぶれど","あまりてなどかひとのこひしき"},
 {"しのぶれどいろにいでにけりわがこひは","ものやおもふとひとのとふまで"},
-{"こひすてふわがなはまだきたちにけり","ひとしれずこそおもひそめしか"},
+{"こひすてふわがなはまだきたちにけり","ひとしれずこそおもひそめしか"},//40
 {"ちぎりきなかたみにそでをしぼりつつ","すゑのまつやまなみこさじとは"},
 {"あひみてののちのこころにくらぶれば","むかしはものをおもはざりけり"},
 {"あふことのたえてしなくばなかなかに","ひとをもみをもうらみざらまし"},
 {"あはれともいふべきひとはおもほえで","みのいたづらになりぬべきかな"},
-{"ゆらのとをわたるふなびとかぢをたえ","ゆくへもしらぬこひのみちかな"},
+{"ゆらのとをわたるふなびとかぢをたえ","ゆくへもしらぬこひのみちかな"},//45
 {"やへむぐらしげれるやどのさびしきに","ひとこそみえねあきはきにけり"},
 {"かぜをいたみいはうつなみのおのれのみ","くだけてものをおもふころかな"},
 {"みかきもりゑじのたくひのよるはもえ","ひるはきえつつものをこそおもへ"},
 {"きみがためをしからざりしいのちさへ","ながくもがなとおもひけるかな"},
-{"かくとだにえやはいぶきのさしもぐさ","さしもしらじなもゆるおもひを"},
+{"かくとだにえやはいぶきのさしもぐさ","さしもしらじなもゆるおもひを"},//50
 {"あけぬればくるるものとはしりながら","なほうらめしきあさぼらけかな"},
 {"なげきつつひとりぬるよのあくるまは","いかにひさしきものとかはしる"},
 {"わすれじのゆくすゑまではかたければ","けふをかぎりのいのちともがな"},
 {"たきのおとはたえてひさしくなりぬれど","なこそながれてなほきこえけれ"},
-{"あらざらむこのよのほかのおもひでに","いまひとたびのあふこともがな"},
+{"あらざらむこのよのほかのおもひでに","いまひとたびのあふこともがな"},//55
 {"めぐりあひてみしやそれともわかぬまに","くもがくれにしよはのつきかな"},
 {"ありまやまゐなのささはらかぜふけば","いでそよひとをわすれやはする"},
 {"やすらはでねなましものをさよふけて","かたぶくまでのつきをみしかな"},
 {"おほえやまいくののみちのとほければ","まだふみもみずあまのはしだて"},
-{"いにしへのならのみやこのやへざくら","けふここのへににほひぬるかな"},
+{"いにしへのならのみやこのやへざくら","けふここのへににほひぬるかな"},//60
 {"よをこめてとりのそらねははかるとも","よにあふさかのせきはゆるさじ"},
 {"いまはただおもひたえなむとばかりを","ひとづてならでいふよしもがな"},
 {"あさぼらけうぢのかはぎりたえだえに","あらはれわたるせぜのあじろぎ"},
 {"うらみわびほさぬそでだにあるものを","こひにくちなむなこそをしけれ"},
-{"もろともにあはれとおもへやまざくら","はなよりほかにしるひともなし"},
+{"もろともにあはれとおもへやまざくら","はなよりほかにしるひともなし"},//65
 {"はるのよのゆめばかりなるたまくらに","かひなくたたむなこそをしけれ"},
 {"こころにもあらでうきよにながらへば","こひしかるべきよはのつきかな"},
 {"あらしふくみむろのやまのもみぢばは","たつたのかはのにしきなりけり"},
 {"さびしさにやどをたちいでてながむれば","いづくもおなじあきのゆふぐれ"},
-{"ゆふさればかどたのいなばおとづれて","あしのまろやにあきかぜぞふく"},
+{"ゆふさればかどたのいなばおとづれて","あしのまろやにあきかぜぞふく"},//70
 {"おとにきくたかしのはまのあだなみは","かけじやそでのぬれもこそすれ"},
 {"たかさごのをのへのさくらさきにけり","とやまのかすみたたずもあらなむ"},
 {"うかりけるひとをはつせのやまおろしよ","はげしかれとはいのらぬものを"},
 {"ちぎりおきしさせもがつゆをいのちにて","あはれことしのあきもいぬめり"},
-{"わたのはらこぎいでてみればひさかたの","くもゐにまがふおきつしらなみ"},
+{"わたのはらこぎいでてみればひさかたの","くもゐにまがふおきつしらなみ"},//75
 {"せをはやみいはにせかるるたきがはの","われてもすゑにあはむとぞおもふ"},
 {"あはぢしまかよふちどりのなくこゑに","いくよねざめぬすまのせきもり"},
 {"あきかぜにたなびくくものたえまより","もれいづるつきのかげのさやけさ"},
 {"ながからむこころもしらずくろかみの","みだれてけさはものをこそおもへ"},
-{"ほととぎすなきつるかたをながむれば","ただありあけのつきぞのこれる"},
+{"ほととぎすなきつるかたをながむれば","ただありあけのつきぞのこれる"},//80
 {"おもひわびさてもいのちはあるものを","うきにたへぬはなみだなりけり"},
 {"よのなかよみちこそなけれおもひいる","やまのおくにもしかぞなくなる"},
 {"ながらへばまたこのごろやしのばれむ","うしとみしよぞいまはこひしき"},
 {"よもすがらものおもふころはあけやらで","ねやのひまさへつれなかりけり"},
-{"なげけとてつきやはものをおもはする","かこちがほなるわがなみだかな"},
+{"なげけとてつきやはものをおもはする","かこちがほなるわがなみだかな"},//85
 {"むらさめのつゆもまだひぬまきのはに","きりたちのぼるあきのゆふぐれ"},
 {"なにはえのあしのかりねのひとよゆゑ","みをつくしてやこひわたるべき"},
 {"たまのをよたえなばたえねながらへば","しのぶることのよわりもぞする"},
 {"みせばやなをじまのあまのそでだにも","ぬれにぞぬれしいろはかはらず"},
-{"きりぎりすなくやしもよのさむしろに","ころもかたしきひとりかもねむ"},
+{"きりぎりすなくやしもよのさむしろに","ころもかたしきひとりかもねむ"},//90
 {"わがそではしほひにみえぬおきのいしの","ひとこそしらねかわくまもなし"},
 {"よのなかはつねにもがもななぎさこぐ","あまのをぶねのつなでかなしも"},
 {"みよしののやまのあきかぜさよふけて","ふるさとさむくころもうつなり"},
 {"おほけなくうきよのたみにおほふかな","わがたつそまにすみぞめのそで"},
-{"はなさそふあらしのにはのゆきならで","ふりゆくものはわがみなりけり"},
+{"はなさそふあらしのにはのゆきならで","ふりゆくものはわがみなりけり"},//95
 {"こぬひとをまつほのうらのゆふなぎに","やくやもしほのみもこがれつつ"},
 {"かぜそよぐならのをがはのゆふぐれは","みそぎぞなつのしるしなりける"},
 {"ひともをしひともうらめしあぢきなく","よをおもふゆゑにものおもふみは"},
 {"ももしきやふるきのきばのしのぶにも","なほあまりあるむかしなりけり"}};
 
+        string[] kimariji = new string[]
+        {
+             "むらさめの",
+             "すみのえの",
+             "せをはやみ",
+             "ふくからに",
+             "さびしさに",
+             "ほととぎす",
+             "せをはやみ",
+             "あけぬれば",
+             "あしびきの",
+             "あひみての",
+             "いにしへの",
+             "うかりける",
+             "うらみわび",
+             "おくやまに",
+             "おとにきく",
+             "おもひわび",
+             "おぐらやま",
+             "かくとだに",
+             "かささぎの",
+             "きりぎりす",
+             "こぬひとを",
+             "このたびは",
+             "こひすてふ",
+             "これやこの",
+             "しのぶれど",
+             "しらつゆに",
+             "たかさごの",
+             "たきのおとは",
+             "たごのうらに",
+             "たちわかれ",
+             "たまのをよ",
+             "たれをかも",
+             "ちはやぶる",
+             "つきみれば",
+             "つくばねの",
+             "なつのよは",
+             "ひさかたの",
+             "みせばやな",
+             "みちのくの",
+             "みよしのの",
+             "ももしきや",
+             "もろともに",
+             "やすらはで",
+             "やへむぐら",
+             "ゆふされば",
+             "ゆらのとを",
+             "よもすがら",
+             "よをこめて",
+             "わびぬれば",
+             "あきかぜに",
+             "あきのたの",
+             "あさぢふの",
+             "あわぢしま",
+             "あわれとも",
+             "あふことの",
+             "あまつかぜ",
+             "あまのはら",
+             "あらざらむ",
+             "あらしふく",
+             "ありあけの",
+             "ありまやま",
+             "いまこむと",
+             "いまはただ",
+             "おほえやま",
+             "おほけなく",
+             "かぜそよぐ",
+             "かぜをいたみ",
+             "ながからむ",
+             "ながらへば",
+             "なげきつつ",
+             "なげけとて",
+             "なにしおはば",
+             "はなさそふ",
+             "はなのいろは",
+             "はるすぎて",
+             "はるのよの",
+             "ひとはいさ",
+             "ひともをし",
+             "みかきもり",
+             "みかのはら",
+             "やまがはに",
+             "やまざとは",
+             "わがいほは",
+             "わがそでは",
+             "わすらるる",
+             "わすれじの",
+             "こころあてに",
+             "こころにも",
+             "ちぎりおきし",
+             "ちぎりきな",
+             "なにはえの",
+             "なにはがた",
+             "よのなかは",
+             "よのなかよ",
+             "あさぼらけ　ありあけ",
+             "あさぼらけ　うじのか",
+             "きみがため　はるのの",
+             "わたのはら　こぎい",
+             "わたのはら　やそしま"
+};
 
+        private SpeechRecognitionEngine recognizer;
 
+        //音声認識のイベントハンドラー
+        void sre_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+            
+            targethuda= searchindex(e.Result.Text);
+            voice.Text = targethuda+":" +e.Result.Text + "  :  " + e.Result.Confidence;
+            //MessageBox.Show(e.Result.Text);
+        }
 
-
-
+        // Write the audio level to the console when the AudioLevelUpdated event is raised.  
+        void recognizer_AudioLevelUpdated(object sender, AudioLevelUpdatedEventArgs e)
+        {
+            //voice.Text= e.AudioLevel.ToString();
+            progressBar1.Value = e.AudioLevel;
+        }
 
 
         public Form1()
         {
             
+
             InitializeComponent();
 
-            
+            progressBar1.Maximum = 100;
+            Choices choices = new Choices();
+            choices.Add(kimariji);
+            GrammarBuilder gb = new GrammarBuilder();
+            gb.Append(choices);
+            // Create the Grammar instance.
+            Grammar g = new Grammar(gb);
+            recognizer = new SpeechRecognitionEngine();
+            recognizer.LoadGrammar(g);
+            recognizer.SpeechRecognized +=
+            new EventHandler<SpeechRecognizedEventArgs>(sre_SpeechRecognized);
+
+            // Add an event handler for the AudioLevelUpdated event.  
+            recognizer.AudioLevelUpdated +=
+              new EventHandler<AudioLevelUpdatedEventArgs>(recognizer_AudioLevelUpdated);
+
+            // Assign input to the recognizer.  
+            recognizer.SetInputToDefaultAudioDevice();
+
+            //候補がある場合は上のを使う
+            //recognizer.RecognizeAsync(RecognizeMode.Multiple);
+            recognizer.RecognizeAsync(RecognizeMode.Multiple);
 
 
             kanas.Add(a);
@@ -267,8 +406,16 @@ namespace OpenVC
                 Mat dst = new Mat();
                 while (enable == 1)
                 {
+                    try
+                    {
+                        capture.Read(img);
+                    }
+                    catch (Exception)
+                    {
+
+                        throw;
+                    }
                    
-                    capture.Read(img);
                     //if (int.Parse(textBox1.Text) == null) textBox1.Text = "0";
                     if (img.Empty()) break;
 
@@ -414,7 +561,7 @@ namespace OpenVC
                                 //if (max_x > 255) max_x = 255;
                                 if (min_y < 0) min_y = 0;
                                 //if (max_y > 255) max_y = 255;
-                                Console.WriteLine((255 - min_x) + ":" + (255 - min_y) + ":");
+                                //Console.WriteLine((255 - min_x) + ":" + (255 - min_y) + ":");
 
                                 Mat yohaku_nukitori = huda_hutidori.Clone(new OpenCvSharp.Rect(min_x, min_y, 255 - min_x, 255 - min_y));
 
@@ -434,58 +581,75 @@ namespace OpenVC
 
 
                                 string waka = "";
-                                
-                                for (int moji = 0; moji < 14; moji++)//14文字すべてを検出する
+
+                                try
+                                {
+                                    for (int moji = 0; moji < 14; moji++)//14文字すべてを検出する
+                                    {
+
+
+                                        Mat trimmed_huda = huda_hutidori.Clone(new OpenCvSharp.Rect(177 - ((moji / 5)) * 85, 5 + (moji % 5) * 46, 47, 37));//210,
+                                        Cv2.Rectangle(yohaku_nukitori, new OpenCvSharp.Rect(177 - ((moji / 5)) * 85, 5 + (moji % 5) * 46, 47, 37), new Scalar(0), 1);
+                                        int kana_no = 0;
+                                        int detected_kana_no = 0;
+                                        int min_count = 10000000;
+                                        //using (new Window("trimmed_huda", WindowMode.AutoSize, trimmed_huda)) ;
+                                        Cv2.MoveWindow("trimmed_huda", 1300, 0);
+                                        foreach (Mat kana in kanas)
+                                        {
+                                            Cv2.BitwiseXor(trimmed_huda, kana, bitwise);
+                                            int tmp_count = Cv2.CountNonZero(bitwise);
+                                            //using (new Window("XOR" + kana_no, WindowMode.AutoSize, bitwise)) ;
+                                            //Cv2.MoveWindow("XOR" + kana_no, (kana_no % 5) * 89, (kana_no / 5) * 69);
+                                            Cv2.BitwiseNot(kana, notb);
+                                            Cv2.BitwiseAnd(notb, trimmed_huda, bitwise);
+                                            tmp_count = tmp_count - Cv2.CountNonZero(bitwise);
+                                            //using (new Window("AND" + kana_no, WindowMode.AutoSize, bitwise)) ;
+                                            //Cv2.MoveWindow("AND" + kana_no, 500 + (kana_no % 5) * 89, (kana_no / 5) * 69);
+                                            //using (new Window("AND", WindowMode.AutoSize, bitwise)) ;
+
+                                            if (tmp_count < min_count)
+                                            {
+                                                detected_kana_no = kana_no;
+                                                min_count = tmp_count;
+                                            }
+                                            kana_no++;
+                                        }
+                                        //Console.WriteLine(detected_kana_no);
+                                        waka += hiragana.Substring(detected_kana_no, 1);
+                                        //using (new Window("detect", WindowMode.AutoSize, kanas[detected_kana_no])) ;
+                                        Cv2.MoveWindow("detect", 1150, 0);
+                                        using (new Window("huda_hutidori", WindowMode.AutoSize, huda_hutidori)) ;
+
+                                    }
+                                }
+                                catch
                                 {
 
-                                    Mat trimmed_huda = huda_hutidori.Clone(new OpenCvSharp.Rect(177 - ((moji / 5)) * 85, 5 + (moji % 5) * 46, 47, 37));//210,
-                                    Cv2.Rectangle(yohaku_nukitori, new OpenCvSharp.Rect(177 - ((moji / 5)) * 85, 5 + (moji % 5) * 46, 47, 37), new Scalar(0), 1);
-                                    int kana_no = 0;
-                                    int detected_kana_no = 0;
-                                    int min_count = 10000000;
-                                    using (new Window("trimmed_huda", WindowMode.AutoSize, trimmed_huda)) ;
-                                    Cv2.MoveWindow("trimmed_huda", 1300, 0);
-                                    foreach (Mat kana in kanas)
-                                    {
-                                        Cv2.BitwiseXor(trimmed_huda, kana, bitwise);
-                                        int tmp_count = Cv2.CountNonZero(bitwise);
-                                        //using (new Window("XOR" + kana_no, WindowMode.AutoSize, bitwise)) ;
-                                        //Cv2.MoveWindow("XOR" + kana_no, (kana_no % 5) * 89, (kana_no / 5) * 69);
-                                        Cv2.BitwiseNot(kana, notb);
-                                        Cv2.BitwiseAnd(notb, trimmed_huda, bitwise);
-                                        tmp_count = tmp_count - Cv2.CountNonZero(bitwise);
-                                        //using (new Window("AND" + kana_no, WindowMode.AutoSize, bitwise)) ;
-                                        //Cv2.MoveWindow("AND" + kana_no, 500 + (kana_no % 5) * 89, (kana_no / 5) * 69);
-                                        //using (new Window("AND", WindowMode.AutoSize, bitwise)) ;
-
-                                        if (tmp_count < min_count)
-                                        {
-                                            detected_kana_no = kana_no;
-                                            min_count = tmp_count;
-                                        }
-                                        kana_no++;
-                                    }
-                                    //Console.WriteLine(detected_kana_no);
-                                    waka += hiragana.Substring(detected_kana_no, 1);
-                                    using (new Window("detect", WindowMode.AutoSize, kanas[detected_kana_no])) ;
-                                    Cv2.MoveWindow("detect", 1150, 0);
-                                    using (new Window("huda_hutidori", WindowMode.AutoSize, huda_hutidori)) ;
-                                    
                                 }
                                 string waka_result = Detectwaka(waka);
-                                Console.WriteLine(waka_result);
+                                //Console.WriteLine(waka_result);
                                 if (int.Parse(waka_result.Split(',')[1]) < tmp_wakascore)
                                 {
                                     tmp_wakascore = int.Parse(waka_result.Split(',')[1]);
                                     waka_no = int.Parse(waka_result.Split(',')[0]);
                                 }
 
-                                using (new Window("yohaku_nukitori", WindowMode.AutoSize, yohaku_nukitori)) ;
+                                //using (new Window("yohaku_nukitori", WindowMode.AutoSize, yohaku_nukitori)) ;
 
                             }
                             Console.WriteLine(hyaku[waka_no, 1]);
                             
-                            
+                             label5.Text = hyaku[waka_no, 1];
+
+                            Cv2.PutText(img, "id: " + waka_no, new Point(appRect.X + appRect.Width / 2, appRect.Y + appRect.Height / 2),HersheyFonts.HersheyComplex,2,new Scalar(0,0,155));
+                            if (waka_no == targethuda)
+                            {
+                                Cv2.Line(img, normalizedEdges[0].X, normalizedEdges[0].Y, normalizedEdges[1].X, normalizedEdges[1].Y, new Scalar(0, 255, 0), 4);
+                                Cv2.Line(img, normalizedEdges[1].X, normalizedEdges[1].Y, normalizedEdges[2].X, normalizedEdges[2].Y, new Scalar(0, 255, 0), 4);
+                                Cv2.Line(img, normalizedEdges[2].X, normalizedEdges[2].Y, normalizedEdges[3].X, normalizedEdges[3].Y, new Scalar(0, 255, 0), 4);
+                                Cv2.Line(img, normalizedEdges[3].X, normalizedEdges[3].Y, normalizedEdges[0].X, normalizedEdges[0].Y, new Scalar(0, 255, 0), 4);
+                            }
 
                         }
                         
@@ -539,6 +703,18 @@ namespace OpenVC
                 enable = 1;
                 this.Text = "停止";
             }
+        }
+
+        public int searchindex(String text)
+        {
+            for (int i = 0; i < hyaku.GetLength(0); i++)
+            {
+                if (hyaku[i, 0].IndexOf(text) == 0)
+                {
+                    return i;
+                }
+            }
+            return 0;
         }
 
         private string GetShape(OpenCvSharp.Point[] c)
@@ -596,8 +772,6 @@ namespace OpenVC
                 }
             }
             return waka.Length - match;
-            
         }
-
     }
 }
