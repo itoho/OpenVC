@@ -425,7 +425,17 @@ namespace OpenVC
                     //dst2 = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,11,float(args[1]))
                     Cv2.Resize(img, img, new OpenCvSharp.Size(imagewidth, imageheight));
                     Cv2.CvtColor(img, dst, ColorConversionCodes.RGB2GRAY);
-                   
+                    // オープニングを実行して背景を取り出す
+                    Mat element = Cv2.GetStructuringElement(MorphShapes.Ellipse,new Size(100,100));
+                    Mat background=new Mat();
+                    Cv2.MorphologyEx(dst, background, MorphTypes.Open, element);
+
+                    // 前景を取得する
+                    Mat foreground=new Mat();
+                    Cv2.Absdiff(dst, background, foreground);
+                    Cv2.ImShow("foreground",foreground);
+                    //dst = foreground;
+
                     unsafe
                     {
                        
@@ -482,7 +492,7 @@ namespace OpenVC
                     **/
 
                     Mat blurred = new Mat();
-                    blurred = dst.GaussianBlur(new OpenCvSharp.Size(5, 5), 0);
+                    blurred = foreground.GaussianBlur(new OpenCvSharp.Size(5, 5), 0);
                     
                     //Binarization of the image.             
                     Mat threshold = new Mat();
