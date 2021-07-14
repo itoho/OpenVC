@@ -42,6 +42,7 @@
             this.voice = new System.Windows.Forms.Label();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.detected = new System.Windows.Forms.Label();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // button1
@@ -106,13 +107,13 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(13, 80);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(29, 12);
+            this.label2.Size = new System.Drawing.Size(91, 12);
             this.label2.TabIndex = 6;
-            this.label2.Text = "閾値";
+            this.label2.Text = "閾値(otsu adapt)";
             // 
             // widthbox
             // 
-            this.widthbox.Location = new System.Drawing.Point(78, 131);
+            this.widthbox.Location = new System.Drawing.Point(81, 149);
             this.widthbox.Name = "widthbox";
             this.widthbox.Size = new System.Drawing.Size(100, 19);
             this.widthbox.TabIndex = 7;
@@ -120,7 +121,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 134);
+            this.label3.Location = new System.Drawing.Point(15, 152);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(32, 12);
             this.label3.TabIndex = 8;
@@ -129,7 +130,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 159);
+            this.label4.Location = new System.Drawing.Point(15, 177);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(36, 12);
             this.label4.TabIndex = 10;
@@ -137,7 +138,7 @@
             // 
             // heightbox
             // 
-            this.heightbox.Location = new System.Drawing.Point(78, 156);
+            this.heightbox.Location = new System.Drawing.Point(81, 174);
             this.heightbox.Name = "heightbox";
             this.heightbox.Size = new System.Drawing.Size(100, 19);
             this.heightbox.TabIndex = 9;
@@ -179,11 +180,20 @@
             this.detected.TabIndex = 14;
             this.detected.Text = "ふだ認識中";
             // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(12, 121);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(82, 19);
+            this.textBox2.TabIndex = 15;
+            this.textBox2.Text = "4";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(288, 275);
+            this.Controls.Add(this.textBox2);
             this.Controls.Add(this.detected);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.voice);
@@ -221,6 +231,7 @@
         private System.Windows.Forms.Label voice;
         private System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.Label detected;
+        private System.Windows.Forms.TextBox textBox2;
     }
 }
 

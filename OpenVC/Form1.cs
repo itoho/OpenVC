@@ -1,7 +1,6 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
-using System.Speech.Recognition;
 using System.Text;
 using System.Windows.Forms;
 
@@ -271,24 +270,7 @@ namespace OpenVC
              "わたのはら　やそしま"
 };
 
-        private SpeechRecognitionEngine recognizer;
-
-        //音声認識のイベントハンドラー
-        void sre_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
-        {
-            
-            targethuda= searchindex(e.Result.Text);
-            voice.Text = targethuda+":" +e.Result.Text + "  :  " + e.Result.Confidence;
-            //MessageBox.Show(e.Result.Text);
-        }
-
-        // Write the audio level to the console when the AudioLevelUpdated event is raised.  
-        void recognizer_AudioLevelUpdated(object sender, AudioLevelUpdatedEventArgs e)
-        {
-            //voice.Text= e.AudioLevel.ToString();
-            progressBar1.Value = e.AudioLevel;
-        }
-
+        
 
         public Form1()
         {
@@ -297,27 +279,6 @@ namespace OpenVC
             InitializeComponent();
 
             progressBar1.Maximum = 100;
-            Choices choices = new Choices();
-            choices.Add(kimariji);
-            GrammarBuilder gb = new GrammarBuilder();
-            gb.Append(choices);
-            // Create the Grammar instance.
-            Grammar g = new Grammar(gb);
-            recognizer = new SpeechRecognitionEngine();
-            recognizer.LoadGrammar(g);
-            recognizer.SpeechRecognized +=
-            new EventHandler<SpeechRecognizedEventArgs>(sre_SpeechRecognized);
-
-            // Add an event handler for the AudioLevelUpdated event.  
-            recognizer.AudioLevelUpdated +=
-              new EventHandler<AudioLevelUpdatedEventArgs>(recognizer_AudioLevelUpdated);
-
-            // Assign input to the recognizer.  
-            recognizer.SetInputToDefaultAudioDevice();
-
-            //候補がある場合は上のを使う
-            //recognizer.RecognizeAsync(RecognizeMode.Multiple);
-            recognizer.RecognizeAsync(RecognizeMode.Multiple);
 
 
             kanas.Add(a);
@@ -382,8 +343,8 @@ namespace OpenVC
         {
             int camindex = comboBox2.SelectedIndex;
             var capture = new VideoCapture(camindex);
-            int fps = 30;
-            int sleepTime = (int)Math.Round((decimal)1000 / fps);
+            float fps = 0.4f;
+            int sleepTime = (int)Math.Round(1000 / fps);
             using (var window = new Window("capture"));
             int imagewidth = 1280;
             int imageheight = 720;
@@ -408,7 +369,8 @@ namespace OpenVC
                 {
                     try
                     {
-                        capture.Read(img);
+                        //capture.Read(img);
+                        img= Cv2.ImRead("sample/100mai1.jpg");
                     }
                     catch (Exception)
                     {
@@ -425,8 +387,8 @@ namespace OpenVC
                     //dst2 = cv2.adaptiveThreshold(gray,255,cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY,11,float(args[1]))
                     Cv2.Resize(img, img, new OpenCvSharp.Size(imagewidth, imageheight));
                     Cv2.CvtColor(img, dst, ColorConversionCodes.RGB2GRAY);
-                    // オープニングを実行して背景を取り出す
-                    Mat element = Cv2.GetStructuringElement(MorphShapes.Ellipse,new Size(100,100));
+                    // 背景を取り出す
+                    Mat element = Cv2.GetStructuringElement(MorphShapes.Ellipse,new Size(90,90));
                     Mat background=new Mat();
                     Cv2.MorphologyEx(dst, background, MorphTypes.Open, element);
 
@@ -509,7 +471,7 @@ namespace OpenVC
                         OpenCvSharp.Rect appRect = Cv2.BoundingRect(normalizedEdges);
                         
                         //OpenCvSharp.Point2f[] point2Fs = new OpenCvSharp.Point2f[] { new Point2f(normalizedEdges[0].X, normalizedEdges[0].Y), new Point2f(normalizedEdges[1].X, normalizedEdges[1].Y), new Point2f(normalizedEdges[2].X, normalizedEdges[2].Y), new Point2f(normalizedEdges[3].X, normalizedEdges[3].Y) };
-                        if (normalizedEdges.Length == 4&&appRect.Size.Height*appRect.Size.Width<=dst.Width*dst.Height*0.98&& appRect.Size.Height * appRect.Size.Width >= dst.Width * dst.Height * 0.02)
+                        if (normalizedEdges.Length == 4&&appRect.Size.Height*appRect.Size.Width<=dst.Width*dst.Height*0.98&& appRect.Size.Height * appRect.Size.Width >= dst.Width * dst.Height * 0.001)
                         {
                             OpenCvSharp.Point2f[] point2Fs = new OpenCvSharp.Point2f[] { new Point2f(normalizedEdges[0].X, normalizedEdges[0].Y), new Point2f(normalizedEdges[1].X, normalizedEdges[1].Y), new Point2f(normalizedEdges[2].X, normalizedEdges[2].Y), new Point2f(normalizedEdges[3].X, normalizedEdges[3].Y) };
                             Cv2.Line(img, normalizedEdges[0].X, normalizedEdges[0].Y, normalizedEdges[1].X, normalizedEdges[1].Y, new Scalar(255, 0, 0), 3);
@@ -520,7 +482,12 @@ namespace OpenVC
                             Mat huda = new Mat(266, 266, MatType.CV_32F); //もともと180x274の予定だった
                             Cv2.WarpPerspective(dst,huda,homo, new OpenCvSharp.Size(266,266));//スキャナーで読みっとった時のサイズによってこの値に決まった。ふち(5x5)を取るためにさらに加えた
                             Mat huda_hutidori = huda.Clone(new OpenCvSharp.Rect(5, 5, 256, 256));
-                            Cv2.AdaptiveThreshold(huda_hutidori,huda_hutidori, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.Binary, 11, 4);
+                            int c = 4;
+                            if (int.TryParse(textBox2.Text, out isparse))
+                            {
+                                c = int.Parse(textBox2.Text);
+                            }
+                            Cv2.AdaptiveThreshold(huda_hutidori,huda_hutidori, 255, AdaptiveThresholdTypes.GaussianC, ThresholdTypes.Binary, 11, c);
 
 
                             /*
@@ -628,15 +595,18 @@ namespace OpenVC
                                         //Console.WriteLine(detected_kana_no);
                                         waka += hiragana.Substring(detected_kana_no, 1);
                                         //using (new Window("detect", WindowMode.AutoSize, kanas[detected_kana_no])) ;
-                                        Cv2.MoveWindow("detect", 1150, 0);
-                                        using (new Window("huda_hutidori", WindowMode.AutoSize, huda_hutidori)) ;
+                                        
 
                                     }
+                                    
                                 }
                                 catch
                                 {
 
                                 }
+
+                               
+                                
                                 string waka_result = Detectwaka(waka);
                                 //Console.WriteLine(waka_result);
                                 if (int.Parse(waka_result.Split(',')[1]) < tmp_wakascore)
@@ -645,6 +615,8 @@ namespace OpenVC
                                     waka_no = int.Parse(waka_result.Split(',')[0]);
                                 }
 
+                               
+
                                 //using (new Window("yohaku_nukitori", WindowMode.AutoSize, yohaku_nukitori)) ;
 
                             }
@@ -652,7 +624,9 @@ namespace OpenVC
                             
                              label5.Text = hyaku[waka_no, 1];
 
-                            Cv2.PutText(img, "id: " + waka_no, new Point(appRect.X + appRect.Width / 2, appRect.Y + appRect.Height / 2),HersheyFonts.HersheyComplex,2,new Scalar(0,0,155));
+
+
+                            Cv2.PutText(img, "id: " + waka_no, new Point(appRect.X + appRect.Width / 2, appRect.Y + appRect.Height / 2),HersheyFonts.HersheyComplex,1,new Scalar(0,0,155));
                             if (waka_no == targethuda)
                             {
                                 Cv2.Line(img, normalizedEdges[0].X, normalizedEdges[0].Y, normalizedEdges[1].X, normalizedEdges[1].Y, new Scalar(0, 255, 0), 4);
@@ -691,8 +665,11 @@ namespace OpenVC
                     using (new Window("threshold", WindowMode.AutoSize, threshold))
 
 
-
-                        window.ShowImage(img);
+                        if (img.Width >= 4000)
+                        {
+                            Cv2.Resize(img, img, new OpenCvSharp.Size(img.Width / 2, img.Height / 2));
+                        }
+                    window.ShowImage(img);
                    
                     Cv2.WaitKey(sleepTime);
                 }
