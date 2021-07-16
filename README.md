@@ -2,6 +2,9 @@
 
 ## 使い方
 
+プラグインをダウンロードする
+https://itoho.wjg.jp/link/test-1.0-SNAPSHOT.jar
+
 マイクラ内でコマンド /startsocket と打つ
 
 ウェブカメラまたは仮想ウェブカメラを用意して、
