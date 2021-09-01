@@ -1,6 +1,7 @@
 ﻿using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Speech.Recognition;
 using System.Text;
 using System.Windows.Forms;
 
@@ -62,9 +63,10 @@ namespace OpenVC
 
         List<Mat> kanas = new List<Mat>(47);
 
+
         string hiragana = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをゐゑ";
 
-        
+
 
         string[,] hyaku = new string[,]{{"あきのたのかりほのいほのとまをあらみ","わがころもではつゆにぬれつつ"},//0
 {"はるすぎてなつきにけらししろたへの","ころもほすてふあまのかぐやま"},
@@ -270,15 +272,55 @@ namespace OpenVC
              "わたのはら　やそしま"
 };
 
-        
+        private SpeechRecognitionEngine recognizer;
+
+        //音声認識のイベントハンドラー
+        void sre_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
+        {
+
+            targethuda = searchindex(e.Result.Text);
+            voice.Text = targethuda + ":" + e.Result.Text + "  :  " + e.Result.Confidence;
+            //MessageBox.Show(e.Result.Text);
+        }
+
+        // Write the audio level to the console when the AudioLevelUpdated event is raised.  
+        void recognizer_AudioLevelUpdated(object sender, AudioLevelUpdatedEventArgs e)
+        {
+            //voice.Text= e.AudioLevel.ToString();
+            progressBar1.Value = e.AudioLevel;
+        }
+
 
         public Form1()
         {
-            
+
 
             InitializeComponent();
 
             progressBar1.Maximum = 100;
+            Choices choices = new Choices();
+            choices.Add(kimariji);
+            GrammarBuilder gb = new GrammarBuilder();
+            gb.Append(choices);
+            // Create the Grammar instance.
+            Grammar g = new Grammar(gb);
+            recognizer = new SpeechRecognitionEngine();
+            recognizer.LoadGrammar(g);
+            recognizer.SpeechRecognized +=
+            new EventHandler<SpeechRecognizedEventArgs>(sre_SpeechRecognized);
+
+            // Add an event handler for the AudioLevelUpdated event.  
+            recognizer.AudioLevelUpdated +=
+              new EventHandler<AudioLevelUpdatedEventArgs>(recognizer_AudioLevelUpdated);
+
+            // Assign input to the recognizer.  
+            recognizer.SetInputToDefaultAudioDevice();
+
+            //候補がある場合は上のを使う
+            //recognizer.RecognizeAsync(RecognizeMode.Multiple);
+            recognizer.RecognizeAsync(RecognizeMode.Multiple);
+
+
 
 
             kanas.Add(a);
@@ -343,7 +385,7 @@ namespace OpenVC
         {
             int camindex = comboBox2.SelectedIndex;
             var capture = new VideoCapture(camindex);
-            float fps = 0.4f;
+            float fps = 30f;
             int sleepTime = (int)Math.Round(1000 / fps);
             using (var window = new Window("capture"));
             int imagewidth = 1280;
@@ -357,8 +399,8 @@ namespace OpenVC
             {
                 imageheight = int.Parse(heightbox.Text);
             }
-            string langPath = "jpn-ocr/jpn.traineddata";//tesseractの設定
-            string lngStr = "jpn";
+            //string langPath = "jpn-ocr/jpn.traineddata";//tesseractの設定
+            //string lngStr = "jpn";
 
            
             using (var window = new Window("capture"))
@@ -380,6 +422,7 @@ namespace OpenVC
                    
                     //if (int.Parse(textBox1.Text) == null) textBox1.Text = "0";
                     if (img.Empty()) break;
+                    
 
                     //Cv2.CvtColor(img, dst, ColorConversionCodes.BGR2GRAY);
                     //Cv2.Resize(dst,dst,new OpenCvSharp.Size(255,255));
@@ -452,7 +495,7 @@ namespace OpenVC
                         }
                     }
                     **/
-
+                    
                     Mat blurred = new Mat();
                     blurred = foreground.GaussianBlur(new OpenCvSharp.Size(5, 5), 0);
                     
@@ -508,6 +551,8 @@ namespace OpenVC
                             int tmp_wakascore = 14;
                             int waka_no = 0;
                             Mat tmp_huda_hutidori = huda_hutidori.Clone();
+                            Mat syuusyuuku = Cv2.GetStructuringElement(MorphShapes.Ellipse, new Size(3, 3));
+                            Cv2.MorphologyEx(tmp_huda_hutidori, tmp_huda_hutidori, MorphTypes.Open, syuusyuuku);
                             for (int i = 0; i < 4; i++)
                             {
                                 Cv2.Rotate(tmp_huda_hutidori, tmp_huda_hutidori, RotateFlags.Rotate90Clockwise);
@@ -620,13 +665,13 @@ namespace OpenVC
                                 //using (new Window("yohaku_nukitori", WindowMode.AutoSize, yohaku_nukitori)) ;
 
                             }
-                            Console.WriteLine(hyaku[waka_no, 1]);
+                            //Console.WriteLine(hyaku[waka_no, 1]);
                             
-                             label5.Text = hyaku[waka_no, 1];
+                             //label5.Text = hyaku[waka_no, 1];
 
+                            detected:
 
-
-                            Cv2.PutText(img, "id: " + waka_no, new Point(appRect.X + appRect.Width / 2, appRect.Y + appRect.Height / 2),HersheyFonts.HersheyComplex,1,new Scalar(0,0,155));
+                            Cv2.PutText(img, "id: " + waka_no, new Point(appRect.X + appRect.Width / 2, appRect.Y + appRect.Height / 2),HersheyFonts.HersheyComplex,2,new Scalar(0,0,155));
                             if (waka_no == targethuda)
                             {
                                 Cv2.Line(img, normalizedEdges[0].X, normalizedEdges[0].Y, normalizedEdges[1].X, normalizedEdges[1].Y, new Scalar(0, 255, 0), 4);
