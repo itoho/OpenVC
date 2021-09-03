@@ -553,12 +553,13 @@ namespace OpenVC
                             Mat tmp_huda_hutidori = huda_hutidori.Clone();
                             Mat syuusyuuku = Cv2.GetStructuringElement(MorphShapes.Ellipse, new Size(3, 3));
                             Cv2.MorphologyEx(tmp_huda_hutidori, tmp_huda_hutidori, MorphTypes.Open, syuusyuuku);
-                            for (int i = 0; i < 4; i++)
+                            for (int i = 0; i < 4; i++)//4方向回転
                             {
                                 Cv2.Rotate(tmp_huda_hutidori, tmp_huda_hutidori, RotateFlags.Rotate90Clockwise);
                                 huda_hutidori = tmp_huda_hutidori.Clone();
                                 Mat huda_not = new Mat();
                                 Cv2.BitwiseNot(huda_hutidori, huda_not);
+                                //余白を消すために輪郭群を取得して座標の最小値と最大値を利用する
                                 OpenCvSharp.Point[][] rects = huda_not.FindContoursAsArray(RetrievalModes.Tree, ContourApproximationModes.ApproxNone);
                                 int min_x = 125;
                                 int min_y = 125;
@@ -610,8 +611,8 @@ namespace OpenVC
                                     {
 
 
-                                        Mat trimmed_huda = huda_hutidori.Clone(new OpenCvSharp.Rect(177 - ((moji / 5)) * 85, 5 + (moji % 5) * 46, 47, 37));//210,
-                                        Cv2.Rectangle(yohaku_nukitori, new OpenCvSharp.Rect(177 - ((moji / 5)) * 85, 5 + (moji % 5) * 46, 47, 37), new Scalar(0), 1);
+                                        Mat trimmed_huda = huda_hutidori.Clone(new OpenCvSharp.Rect(177 - (moji / 5) * 85, 5 + (moji % 5) * 46, 47, 37));//210,
+                                        Cv2.Rectangle(yohaku_nukitori, new OpenCvSharp.Rect(177 - (moji / 5) * 85, 5 + (moji % 5) * 46, 47, 37), new Scalar(0), 1);
                                         int kana_no = 0;
                                         int detected_kana_no = 0;
                                         int min_count = 10000000;
@@ -639,11 +640,15 @@ namespace OpenVC
                                         }
                                         //Console.WriteLine(detected_kana_no);
                                         waka += hiragana.Substring(detected_kana_no, 1);
+
                                         //using (new Window("detect", WindowMode.AutoSize, kanas[detected_kana_no])) ;
-                                        
+                                        using (new Window("detect", WindowMode.AutoSize, yohaku_nukitori)) ;
+
+
+
 
                                     }
-                                    
+
                                 }
                                 catch
                                 {
